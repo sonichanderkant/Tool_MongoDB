@@ -14,7 +14,7 @@ pipeline {
         stages {
         stage('Clone Repository') {
             steps {
-                git url: 'https://github.https://github.com/sonichanderkant/Tool_MongoDB.git', branch: 'main'
+                git url: 'https://github.com/sonichanderkant/Tool_MongoDB.git', branch: 'main'
             }
         }
 
