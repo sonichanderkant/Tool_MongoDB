@@ -1,36 +1,81 @@
 pipeline {
+  agent any
 
-    parameters {
-        booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
-        choice(name: 'action', choices: ['apply', 'destroy'], description: 'Select the action to perform')
-    } 
-    environment {
-        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
-        AWS_DEFAULT_REGION = 'ap-south-1'
+  parameters {
+    string(name: 'AWS_REGION', defaultValue: 'ap-southeast-2', description: 'AWS Region')
+    string(name: 'TF_VAR_instance_type', defaultValue: 't2.micro', description: 'Instance Type')
+    string(name: 'TF_VAR_ami', defaultValue: 'ami-0892a9c01908fafd1', description: 'AMI ID')
+    booleanParam(name: 'auto_approve', defaultValue: false, description: 'Automatically apply Terraform changes')
+    choice(name: 'ACTION', choices: ['apply', 'destroy'], description: 'Select Terraform action: Apply or Destroy')
+  }
+
+  environment {
+    AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+    TF_VAR_region = "${params.AWS_REGION}"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        git branch: 'main', url: 'https://github.com/sonichanderkant/Tool_MongoDB.git'
+      }
     }
 
-   agent  any
-        stages {
-        stage('Clone Repository') {
-            steps {
-                git url: 'https://github.com/sonichanderkant/Tool_MongoDB.git', branch: 'main'
-            }
-        }
-
-        stage('Plan') {
-            steps {
-                sh 'pwd;cd Terraform/ ; terraform init'
-                sh 'pwd;cd Terraform/ ; terraform validate'
-                sh 'pwd;cd Terraform/ ; terraform plan'
-            }
-        }
-      
-        stage('Apply/Destroy') {
-            steps {
-                sh 'pwd;cd Terraform/ ; terraform ${action} --auto-approve'
-            }
-        }
+    stage('Terraform Init') {
+      steps {
+        sh 'terraform init'
+      }
     }
 
+    stage('Terraform Plan') {
+      when {
+        expression { return params.ACTION == 'apply' }
+      }
+      steps {
+        sh 'terraform plan -out=tfplan'
+      }
+    }
+
+    stage('Terraform Apply') {
+      when {
+        expression { return params.ACTION == 'apply' }
+      }
+      steps {
+        script {
+          if (params.auto_approve) {
+            sh 'terraform apply -auto-approve tfplan'
+          } else {
+            input(message: 'Do you want to apply these changes?', ok: 'Apply')
+            sh 'terraform apply tfplan'
+          }
+        }
+      }
+    }
+
+    stage('Terraform Destroy') {
+      when {
+        expression { return params.ACTION == 'destroy' }
+      }
+      steps {
+        script {
+          if (params.auto_approve) {
+            sh 'terraform destroy -auto-approve'
+          } else {
+            input(message: 'Do you want to destroy the infrastructure?', ok: 'Destroy')
+            sh 'terraform destroy -auto-approve'
+          }
+        }
+      }
+    }
+  }
+
+  // post {
+  //   always {
+  //     cleanWs()
+  //   }
+  //   failure {
+  //     echo 'The build failed. Check the logs for details.'
+  //   }
+  // }
 }
