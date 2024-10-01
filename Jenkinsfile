@@ -2,9 +2,7 @@ pipeline {
   agent any
 
   parameters {
-    string(name: 'AWS_REGION', defaultValue: 'ap-southeast-2', description: 'AWS Region')
-    string(name: 'TF_VAR_instance_type', defaultValue: 't2.micro', description: 'Instance Type')
-    string(name: 'TF_VAR_ami', defaultValue: 'ami-0892a9c01908fafd1', description: 'AMI ID')
+  
     booleanParam(name: 'auto_approve', defaultValue: false, description: 'Automatically apply Terraform changes')
     choice(name: 'ACTION', choices: ['apply', 'destroy'], description: 'Select Terraform action: Apply or Destroy')
   }
@@ -69,13 +67,4 @@ pipeline {
       }
     }
   }
-
-  // post {
-  //   always {
-  //     cleanWs()
-  //   }
-  //   failure {
-  //     echo 'The build failed. Check the logs for details.'
-  //   }
-  // }
 }
