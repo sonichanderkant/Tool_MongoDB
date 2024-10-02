@@ -106,9 +106,25 @@ resource "aws_network_acl" "Private_NACL" {
    protocol   = "tcp"
    rule_no    = 120
    action     = "allow"
-   cidr_block = "10.0.0.0/27"
+   cidr_block = "10.0.0.32/27"
    from_port  = 27017
    to_port    = 27017
+}
+ingress {
+   protocol   = "tcp"
+   rule_no    = 130
+   action     = "allow"
+   cidr_block = "10.0.0.64/27"
+   from_port  = 27017
+   to_port    = 27017
+}
+ingress {
+   protocol   = "tcp"
+   rule_no    = 140
+   action     = "allow"
+   cidr_block = "172.31.0.0/16"
+   from_port  = 22
+   to_port    = 22
 }
   egress {
    protocol   = "tcp"
@@ -120,7 +136,7 @@ resource "aws_network_acl" "Private_NACL" {
 }
   egress {
    protocol   = "tcp"
-   rule_no    = 120
+   rule_no    = 110
    action     = "allow"
    cidr_block = "0.0.0.0/0"
    from_port  = 80
@@ -128,11 +144,27 @@ resource "aws_network_acl" "Private_NACL" {
 }
   egress {
    protocol   = "tcp"
-   rule_no    = 130
+   rule_no    = 120
    action     = "allow"
    cidr_block = "0.0.0.0/0"
    from_port  = 443
    to_port    = 443
+}
+egress {
+   protocol   = "tcp"
+   rule_no    = 130
+   action     = "allow"
+   cidr_block = "10.0.0.32/27"
+   from_port  = 27017
+   to_port    = 27017
+}
+egress {
+   protocol   = "tcp"
+   rule_no    = 140
+   action     = "allow"
+   cidr_block = "10.0.0.64/27"
+   from_port  = 27017
+   to_port    = 27017
 }
 tags = {
     Name = "Private_NACL"
