@@ -1,9 +1,17 @@
 ---
 plugin: aws_ec2
 regions:
-  - ap-south-1
+   - ap-south-1
 filters:
-  instance-state-code: 16
-keyed_groups:
-  - key: tags
-    prefix: tag
+  tag:Name:
+    - "mongo-private-1"
+    - "mongo-private-2"
+compose:
+  # ansible_host: public_ip_address  # For public instances
+   ansible_host: private_ip_address  # Uncomment if using private instances
+# Optional: Use strict mode to enforce only these hosts
+strict: False
+# Optional: cache the inventory for better performance
+cache: True
+cache_timeout: 600  # seconds
+ansible_ssh_common_args: '-o ConnectTimeout=60'
