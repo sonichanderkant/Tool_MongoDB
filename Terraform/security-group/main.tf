@@ -41,7 +41,7 @@ resource "aws_security_group" "public-SG" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0" ]
+    cidr_blocks = ["0.0.0.0/0"]   # Allow traffic from any IP address
   }
 
   # Ingress rule for HTTP (port 80)
@@ -52,12 +52,12 @@ resource "aws_security_group" "public-SG" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Ingress rule for ICMP (ping) from the default VPC security group
+  # Ingress rule for ICMP (ping)
   ingress {
     from_port        = -1                # ICMP type (all types)
     to_port          = -1                # ICMP code (all codes)
     protocol         = "icmp"
-    cidr_blocks      = ["172.31.0.0/16"]
+    cidr_blocks      = ["172.31.0.0/16", "0.0.0.0/0"]  # Allow from default VPC and anywhere
      
     ipv6_cidr_blocks = []
   }
@@ -71,12 +71,12 @@ resource "aws_security_group" "public-SG" {
 resource "aws_security_group" "private-SG" {
   vpc_id = var.vpc_id   # Corrected to use 'var.vpc_id'
 
-  # Ingress rule for mongo (port 27017)
+  # Ingress rule for MongoDB (port 27017) allowing traffic from any IP address
   ingress {
     from_port   = 27017
     to_port     = 27017
     protocol    = "tcp"
-    cidr_blocks = ["10.0.1.0/24"]  # Custom CIDR block
+    cidr_blocks = ["0.0.0.0/0"]  # Allow traffic from any IP address
   }
 
   # Ingress rule for SSH (port 22)
@@ -84,15 +84,15 @@ resource "aws_security_group" "private-SG" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["172.31.0.0/16"]
+    cidr_blocks = ["172.31.0.0/16", "0.0.0.0/0"]  # Allow SSH from default VPC and anywhere
   }
 
-  # Ingress rule for ICMP (ping) from the default VPC security group
+  # Ingress rule for ICMP (ping)
   ingress {
     from_port        = -1                # ICMP type (all types)
     to_port          = -1                # ICMP code (all codes)
     protocol         = "icmp"
-    cidr_blocks  = ["172.31.0.0/16"]  # Reference to the resource
+    cidr_blocks      = ["172.31.0.0/16", "0.0.0.0/0"]  # Allow from default VPC and anywhere
     ipv6_cidr_blocks = []
   }
 
@@ -109,20 +109,21 @@ resource "aws_security_group" "private-SG" {
   }
 }
 
-/* Genrate Key
+/* Generate Key
 resource "tls_private_key" "rsa_4096" {
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
-# Genrate pen Key 
+# Generate public Key 
 resource "aws_key_pair" "key_pair" {
   key_name   = var.key_name
   public_key = tls_private_key.rsa_4096.public_key_openssh
 }
 
-# pem Key download in sysytem
+# PEM Key download in system
 resource "local_file" "private_key" {
   content = tls_private_key.rsa_4096.private_key_pem
   filename = var.key_name
-}*/
+}
+*/
