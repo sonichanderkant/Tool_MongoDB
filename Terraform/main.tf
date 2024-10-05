@@ -71,13 +71,7 @@ module "private_RT" {
   vpc_peering_id           = module.vpc_peering.vpc_peering_id
 }
 
-module "nacl" {
-  source             = "./nacl"
-  vpc_id             = module.vpc.vpc_id
-  Public_subnet_id   = module.subnet.Public_subnet_id
-  Private_subnet1_id = module.subnet.Private_subnet1_id
-  Private_subnet2_id = module.subnet.Private_subnet2_id
-}
+
 
 module "vpc_peering" {
   source           = "./vpc_peering"
